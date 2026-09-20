@@ -1,0 +1,7 @@
+/mvnw text eol=lf
+**/mvnw text eol=lf
+**/mvnw.cmd text eol=crlf
+**/*.sh text eol=lf
+
+# Keep wrapper JARs in repo if needed for offline builds
+**/.mvn/wrapper/*.jar -text

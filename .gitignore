@@ -1,0 +1,25 @@
+# Maven
+**/target/
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath
+**/.springBeans
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local env
+.env
+
+# Maven wrapper jars are usually kept in version control for reproducible builds
+# but generated artifacts can stay ignored.
