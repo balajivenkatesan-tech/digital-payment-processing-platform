@@ -11,4 +11,11 @@
 	<artifactId>fraud-service</artifactId>
 	<name>fraud-service</name>
 	<description>Fraud Detection Service</description>
+	<dependencies>
+		<dependency>
+			<groupId>com.digital.payment.platform</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>

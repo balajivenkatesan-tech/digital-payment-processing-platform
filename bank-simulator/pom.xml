@@ -11,4 +11,11 @@
 	<artifactId>bank-simulator</artifactId>
 	<name>bank-simulator</name>
 	<description>Bank Simulator Service</description>
+	<dependencies>
+		<dependency>
+			<groupId>com.digital.payment.platform</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>

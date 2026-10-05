@@ -11,4 +11,11 @@
 	<artifactId>settlement-service</artifactId>
 	<name>settlement-service</name>
 	<description>Settlement Service</description>
+	<dependencies>
+		<dependency>
+			<groupId>com.digital.payment.platform</groupId>
+			<artifactId>common-lib</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 </project>
