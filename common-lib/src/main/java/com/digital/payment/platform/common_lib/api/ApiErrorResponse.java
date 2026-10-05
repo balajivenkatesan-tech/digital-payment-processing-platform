@@ -5,15 +5,21 @@ import java.util.List;
 import java.util.Objects;
 
 public record ApiErrorResponse(
-        String code,
-        String message,
+    String type,
+    String title,
         int status,
+    String detail,
         String instance,
+    String code,
+    String message,
         String correlationId,
         Instant timestamp,
         List<ValidationError> errors
 ) {
     public ApiErrorResponse {
+    Objects.requireNonNull(type, "type cannot be null");
+    Objects.requireNonNull(title, "title cannot be null");
+    Objects.requireNonNull(detail, "detail cannot be null");
         Objects.requireNonNull(code, "code cannot be null");
         Objects.requireNonNull(message, "message cannot be null");
         Objects.requireNonNull(instance, "instance cannot be null");
@@ -28,10 +34,13 @@ public record ApiErrorResponse(
             List<ValidationError> errors
     ) {
         return new ApiErrorResponse(
+                "about:blank",
+                "Bad Request",
+                400,
+                "Validation failed",
+                instance,
                 "VALIDATION_ERROR",
                 "Validation failed",
-                400,
-                instance,
                 correlationId,
                 Instant.now(),
                 errors

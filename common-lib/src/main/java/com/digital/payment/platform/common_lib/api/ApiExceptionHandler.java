@@ -5,16 +5,18 @@ import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
-
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(
@@ -25,13 +27,7 @@ public class ApiExceptionHandler {
                 .map(this::toValidationError)
                 .toList();
 
-        ApiErrorResponse response = ApiErrorResponse.validation(
-                request.getRequestURI(),
-                resolveCorrelationId(request),
-                errors
-        );
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return problemResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Validation failed", request, errors);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
@@ -46,13 +42,53 @@ public class ApiExceptionHandler {
                 ))
                 .toList();
 
-        ApiErrorResponse response = ApiErrorResponse.validation(
+        return problemResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Validation failed", request, errors);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorResponse> handleUnhandledException(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        HttpStatusCode status = HttpStatus.INTERNAL_SERVER_ERROR;
+        String code = "INTERNAL_ERROR";
+        String message = "An unexpected error occurred";
+
+        if (ex instanceof ErrorResponse errorResponse && errorResponse.getStatusCode().is4xxClientError()) {
+            status = errorResponse.getStatusCode();
+            code = "HTTP_ERROR";
+            String detail = errorResponse.getBody().getDetail();
+            message = detail == null || detail.isBlank() ? "The request could not be processed" : detail;
+        }
+
+        return problemResponse(status, code, message, request, List.of());
+    }
+
+    private ResponseEntity<ApiErrorResponse> problemResponse(
+            HttpStatusCode status,
+            String code,
+            String message,
+            HttpServletRequest request,
+            List<ValidationError> errors
+    ) {
+        HttpStatus knownStatus = HttpStatus.resolve(status.value());
+        String title = knownStatus == null ? "HTTP Error" : knownStatus.getReasonPhrase();
+        ApiErrorResponse response = new ApiErrorResponse(
+                "about:blank",
+                title,
+                status.value(),
+                message,
                 request.getRequestURI(),
+                code,
+                message,
                 resolveCorrelationId(request),
+                java.time.Instant.now(),
                 errors
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(status)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(response);
     }
 
     private ValidationError toValidationError(FieldError fieldError) {
